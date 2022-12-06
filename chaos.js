@@ -1,51 +1,64 @@
-var coordinates;			// Points of main triangle
-var lastPoint;				// Last point drawn
-var canvas, ctx;
-const totalPoints = 500000;		// No of points to be drawn
+function ChaosGame() {
+  const TOTAL_POINTS = 500000; // No of points to be drawn
+  let initialCoordinates; // Points of main triangle
+  let canvasCtx, width, height;
 
-function init() {
-	let h = window.innerHeight;
-	let w = window.innerWidth - 20;
+  function createCoordinate(x, y) {
+    return { x, y };
+  }
 
-	// Set triangle points
-	coordinates = [
-		{ x: w / 2, y: 0 },
-		{ x: 10, y: h - 10 },
-		{ x: w - 30, y: h - 10 }
-	];
+  function createCanvas(width, height) {
+    let canvas = document.createElement("canvas");
+    canvas.setAttribute("width", width);
+    canvas.setAttribute("height", height);
+    document.body.appendChild(canvas);
+    return canvas.getContext("2d");
+  }
 
-	canvas = document.createElement("canvas");
-	canvas.setAttribute("width", w);
-	canvas.setAttribute("height", h);
-	document.body.appendChild(canvas);
-	ctx = canvas.getContext("2d");
+  function plotPoint(point) {
+    canvasCtx.fillRect(point.x, point.y, 1, 1);
+  }
 
-	// Plot the triangle points
-	coordinates.forEach(p => {
-		plotPoint(p);
-	});
+  function generateFractal(initialPoint) {
+    let lastPoint = initialPoint;
+    for (let i = 0; i < TOTAL_POINTS; i++) {
+      // Choose random corner of the triangle
+      let p = Math.floor(Math.random() * 3);
+      let midPoint = createCoordinate(
+        (lastPoint.x + initialCoordinates[p].x) / 2,
+        (lastPoint.y + initialCoordinates[p].y) / 2
+      );
+      plotPoint(midPoint);
 
-	// Initial point
-	lastPoint = { x: w / 2, y: h / 2 };
+      // Update last point drawn
+      lastPoint = midPoint;
+    }
+  }
 
-	generate();
-}
+  function init() {
+    height = window.innerHeight;
+    width = window.innerWidth - 20;
 
-function plotPoint(point) {
-	ctx.fillRect(point.x, point.y, 1, 1);
-}
+    canvasCtx = createCanvas(width, height);
 
-function generate() {
-	for (let i = 0; i < totalPoints; i++) {
-		// Choose random corner of the triangle 
-		let p = Math.floor(Math.random() * 3);
-		let midPoint = {
-			x: (lastPoint.x + coordinates[p].x) / 2,
-			y: (lastPoint.y + coordinates[p].y) / 2
-		}
-		plotPoint(midPoint);
+    // Set triangle points
+    initialCoordinates = [
+      createCoordinate(width / 2, 0),
+      createCoordinate(10, height - 10),
+      createCoordinate(width - 30, height - 10),
+    ];
+  }
 
-		// Update last point drawn
-		lastPoint = midPoint;
-	}
+  function start() {
+    // Plot the triangle points
+    initialCoordinates.forEach((c) => {
+      plotPoint(c);
+    });
+    // Initial point to start drawing fractal from
+    let initialPoint = createCoordinate(width / 2, height / 2);
+    generateFractal(initialPoint);
+  }
+
+  init();
+  start();
 }
